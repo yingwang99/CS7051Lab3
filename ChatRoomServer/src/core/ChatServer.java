@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.rmi.CORBA.Util;
 import javax.sound.midi.MidiDevice.Info;
@@ -26,8 +28,11 @@ import DTO.User;
 import DTO.Utility;
 
 public class ChatServer {
+	private static ExecutorService executorService = null;
 	public static ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
 	public static HashMap<String, ServerThread> userMap = new HashMap<String, ServerThread>();
+
+	final int POOL_SIZE=10;
 
 	private ServerSocket serverSocket = null;
 	private String localIp = "";
@@ -38,16 +43,17 @@ public class ChatServer {
 	public ChatServer() {
 
 		try {
+	        executorService=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*POOL_SIZE);
 			serverSocket = new ServerSocket(54321);
 			localIp = InetAddress.getLocalHost().getHostAddress();
-
+			System.out.println("Server start");
 			while (true) {
 
 				Socket cs = serverSocket.accept();
-				System.out.println("Server start");
-
+				ServerThread thread = new ServerThread(cs);
+				executorService.execute(thread);
 				id++;
-				new ServerThread(cs).start();
+				
 
 			}
 		} catch (IOException e) {
@@ -66,7 +72,7 @@ public class ChatServer {
 
 		boolean check = false;
 		String respond = "";
-		String joinRoom = mString[0].substring(mString[0].indexOf(":") + 1);
+		String joinRoom = mString[0].split(":")[1];
 
 		System.out.println(checkJoin(joinRoom.trim(), s));
 		if (checkJoin(joinRoom.trim(), s) == false) {
@@ -97,7 +103,7 @@ public class ChatServer {
 			writer.println(respond);
 
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
-					+ Utility.MESSAGE + ":" + mString[3].substring(mString[3].indexOf(":") + 1)
+					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
 					+ " has joined this chatroom.\n";
 			pushToAll(joinRoom, joinInform, s, writer);
 
@@ -126,7 +132,7 @@ public class ChatServer {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
 			ServerThread serverThread = (ServerThread) entry.getValue();
-			if (room.equals(key.substring(0, key.indexOf("%%"))) && serverThread.equals(server)) {
+			if (room.equals(key.split("%%")[0]) && serverThread.equals(server)) {
 				return true;
 			}
 		}
@@ -141,11 +147,10 @@ public class ChatServer {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
 			ServerThread serverThread = (ServerThread) entry.getValue();
-			System.out.println(key.substring(0, key.indexOf("%%")));
+			System.out.println(key.split(":")[0]);
 			System.out.println("check chat room: " + room);
 			
-			if (key.substring(0, key.indexOf("%%")).equals(room)) {
-			
+			if (key.split("%%")[0].equals(room)) {	
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 			}
@@ -156,8 +161,8 @@ public class ChatServer {
 
 	public String respondLeave(String[] mString) {
 
-		return Utility.LEFT_CHATROOM + ":" + mString[0].substring(mString[0].indexOf(":") + 1) + Utility.SEGEMENT
-				+ Utility.JOIN_ID + ":" + mString[1].substring(mString[1].indexOf(":") + 1);
+		return Utility.LEFT_CHATROOM + ":" + mString[0].split(":")[1] + Utility.SEGEMENT
+				+ Utility.JOIN_ID + ":" + mString[1].split(":")[1];
 
 	}
 
@@ -188,10 +193,7 @@ public class ChatServer {
 			String info;
 			try {
 				while ((info = reader.readLine()) != null) {
-					// System.out.println(Utility.dispatchMessage(info));
-					// System.out.println(info);
-					// String[] mString = info.split("@");
-
+					
 					if (info.startsWith(Utility.JOIN_CHATROOM)) {
 						String[] mString = addToString(4, info);
 						respondJoin(mString, this, writer);
@@ -214,7 +216,7 @@ public class ChatServer {
 									check = true;
 									String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
 											+ Utility.SEGEMENT + Utility.MESSAGE + ":"
-											+ mString[2].substring(mString[2].indexOf(":") + 1)
+											+ mString[2].split(":")[1] 
 											+ " has left this chatroom.\n";
 									pushToAll(leave, leaveMsg, this, writer);
 									synchronized (userMap) {
