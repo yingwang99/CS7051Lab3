@@ -52,7 +52,7 @@ public class ChatServer {
 				Socket cs = serverSocket.accept();
 				ServerThread thread = new ServerThread(cs);
 				executorService.execute(thread);
-				id++;
+				
 				
 
 			}
@@ -84,6 +84,7 @@ public class ChatServer {
 				chatRoom = new ChatRoom(chatRooms.size(), joinRoom);
 				synchronized (chatRooms) {
 					chatRooms.add(chatRoom);
+					id++;
 				}
 			}
 
