@@ -151,6 +151,7 @@ public class ChatServer {
 			System.out.println("check chat room: " + room);
 			
 			if (key.split(":")[0].equals(room)) {	
+				System.out.println(msg);
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 			}
