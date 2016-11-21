@@ -52,10 +52,9 @@ public class ChatServer {
 				Socket cs = serverSocket.accept();
 				ServerThread thread = new ServerThread(cs);
 				executorService.execute(thread);
-				
-				
-
+	
 			}
+			id++;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -82,13 +81,21 @@ public class ChatServer {
 
 			if (checkChatRoom(joinRoom) == false) {
 				chatRoom = new ChatRoom(chatRooms.size(), joinRoom);
+		
 				synchronized (chatRooms) {
 					chatRooms.add(chatRoom);
-					id++;
+				}
+				roomRef = chatRoom.getChatRoomId();
+
+			}else{
+				for(ChatRoom c: chatRooms){
+					if(c.getChatRoomName().equals(joinRoom)){
+						roomRef = c.getChatRoomId();
+						break;
+					}
 				}
 			}
 
-			roomRef = chatRoom.getChatRoomId();
 
 			respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
 					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
