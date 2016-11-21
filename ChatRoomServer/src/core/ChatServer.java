@@ -143,9 +143,9 @@ public class ChatServer {
 			ServerThread serverThread = (ServerThread) entry.getValue();
 			System.out.println(key.substring(0, key.indexOf("%%")));
 			System.out.println("check chat room: " + room);
+			
 			if (key.substring(0, key.indexOf("%%")).equals(room)) {
 			
-				System.out.println(serverThread.getSocket());
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 			}
