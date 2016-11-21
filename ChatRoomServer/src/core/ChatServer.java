@@ -150,7 +150,7 @@ public class ChatServer {
 			System.out.println(key.split(":")[0]);
 			System.out.println("check chat room: " + room);
 			
-			if (key.split("%%")[0].equals(room)) {	
+			if (key.split("\\%\\%")[0].equals(room)) {	
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 			}
