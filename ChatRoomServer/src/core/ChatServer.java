@@ -52,9 +52,9 @@ public class ChatServer {
 				Socket cs = serverSocket.accept();
 				ServerThread thread = new ServerThread(cs);
 				executorService.execute(thread);
-	
+				id++;
 			}
-			id++;
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
