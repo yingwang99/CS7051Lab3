@@ -95,7 +95,7 @@ public class ChatServer {
 
 			mapId++;
 			synchronized (userMap) {
-				userMap.put(joinRoom + "%%" + mapId, s);
+				userMap.put(joinRoom + ":" + mapId, s);
 				System.out.println("join room: " + joinRoom);
 				System.out.println("user map size: " + userMap.size());
 			}
@@ -132,7 +132,7 @@ public class ChatServer {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
 			ServerThread serverThread = (ServerThread) entry.getValue();
-			if (room.equals(key.split("%%")[0]) && serverThread.equals(server)) {
+			if (room.equals(key.split(":")[0]) && serverThread.equals(server)) {
 				return true;
 			}
 		}
@@ -150,7 +150,7 @@ public class ChatServer {
 			System.out.println(key.split(":")[0]);
 			System.out.println("check chat room: " + room);
 			
-			if (key.split("\\%\\%")[0].equals(room)) {	
+			if (key.split(":")[0].equals(room)) {	
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 			}
