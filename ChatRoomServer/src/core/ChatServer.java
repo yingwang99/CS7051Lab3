@@ -209,7 +209,7 @@ public class ChatServer {
 								Map.Entry entry = (Map.Entry) iter.next();
 								String key = (String) entry.getKey();
 								ServerThread value = (ServerThread) entry.getValue();
-								if (key.substring(0, key.indexOf(":s")).equals(leave) && value.equals(this)) {
+								if (key.substring(0, key.indexOf(":")).equals(leave) && value.equals(this)) {
 									System.out.println(respondLeave(mString));
 									writer.println(respondLeave(mString));
 									writer.flush();
