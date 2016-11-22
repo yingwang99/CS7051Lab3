@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 
 import javax.rmi.CORBA.Util;
 import javax.sound.midi.MidiDevice.Info;
+import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 
 import DTO.ChatRoom;
 import DTO.User;
@@ -31,7 +32,7 @@ public class ChatServer {
 	private static ExecutorService executorService = null;
 	public static ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
 	public static HashMap<String, ServerThread> userMap = new HashMap<String, ServerThread>();
-	
+	Iterator iter = userMap.entrySet().iterator();
 	final int POOL_SIZE=10;
 
 	private ServerSocket serverSocket = null;
@@ -89,7 +90,7 @@ public class ChatServer {
 			}else{
 				chatRoom = checkChatRoom(joinRoom);
 			}
-
+			String nickname = mString[3].split(":")[1];
 			roomRef = chatRoom.getChatRoomId();
 
 			mapId++;
@@ -100,7 +101,7 @@ public class ChatServer {
 			
 			synchronized (userMap) {
 				
-				userMap.put(joinRoom + ":" + mapId, s);
+				userMap.put(joinRoom + ":" + roomRef + ":" + nickname, s);
 				System.out.println("join room: " + joinRoom);
 				System.out.println("user map size: " + userMap.size());
 			}
@@ -108,7 +109,7 @@ public class ChatServer {
 			writer.println(respond);
 
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
-					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
+					+ Utility.MESSAGE + ":" + nickname
 					+ " has joined this chatroom.\n";
 			pushToAll(joinRoom, joinInform, s, writer);
 
@@ -132,7 +133,6 @@ public class ChatServer {
 	}
 
 	public synchronized boolean checkJoin(String room, ServerThread server) {
-		Iterator iter = userMap.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
@@ -148,7 +148,6 @@ public class ChatServer {
 	}
 
 	public synchronized void pushToAll(String room, String msg, ServerThread s, PrintWriter writer) throws IOException {
-		Iterator iter = userMap.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
@@ -186,6 +185,7 @@ public class ChatServer {
 		private BufferedReader reader;
 		private PrintWriter writer;
 		private int join_id;
+		private String client_name;
 
 		public ServerThread(Socket socket,int join_id) throws IOException {
 			this.socket = socket;
@@ -204,16 +204,21 @@ public class ChatServer {
 				while ((info = reader.readLine()) != null) {
 					
 					if (info.startsWith(Utility.JOIN_CHATROOM)) {
+						
 						String[] mString = addToString(4, info);
+						
+						if(this.getClient_name() == null)
+							this.setClient_name(mString[3].split(":")[1]);
+						
 						respondJoin(mString, this, writer);
 					} else if (info.startsWith(Utility.LEAVE_CHATROOM)) {
 						String[] mString = addToString(3, info);
 						try {
 							System.out.println(info.substring(info.indexOf(" ") + 1));
-							int roomR = Integer.parseInt(info.trim().substring(info.indexOf(" ") + 1));
+							int roomR = Integer.parseInt(info.substring(info.indexOf(" ") + 1));
 							String leave = chatRooms.get(roomR).getChatRoomName();
 							boolean check = false;
-							Iterator iter = userMap.entrySet().iterator();
+							
 							while (iter.hasNext()) {
 								Map.Entry entry = (Map.Entry) iter.next();
 								String key = (String) entry.getKey();
@@ -223,10 +228,7 @@ public class ChatServer {
 									writer.println(respondLeave(mString));
 									writer.flush();
 									check = true;
-									String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
-											+ Utility.SEGEMENT + Utility.MESSAGE + ":"
-											+ mString[2].split(":")[1] 
-											+ " has left this chatroom.\n";
+									String leaveMsg = leaveMsg(mString, roomR);
 									pushToAll(leave, leaveMsg, this, writer);
 									synchronized (userMap) {
 										System.out.println(userMap.size());
@@ -276,7 +278,20 @@ public class ChatServer {
 						}
 
 					} else if (info.startsWith(Utility.DISCONNECT)) {
-						addToString(3, info);
+						String[] mString =addToString(3, info);
+						
+						while (iter.hasNext()) {
+							Map.Entry entry = (Map.Entry) iter.next();
+							String key = (String) entry.getKey();
+							ServerThread value = (ServerThread) entry.getValue();
+							
+							if(value.getClient_name().equals(this.getClient_name())){
+								
+								pushToAll(key.split(":")[0], leaveMsg(mString, Integer.parseInt(key.split(":")[1])), this, writer);
+								
+							}
+						}
+				        
 						if (!socket.isClosed()) {
 							socket.close();
 						}
@@ -295,6 +310,16 @@ public class ChatServer {
 				e1.printStackTrace();
 			}
 
+		}
+
+
+
+		private String leaveMsg(String[] mString, int roomR) {
+			String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
+					+ Utility.SEGEMENT + Utility.MESSAGE + ":"
+					+ mString[2].split(":")[1] 
+					+ " has left this chatroom.\n";
+			return leaveMsg;
 		}
 
 		private String[] addToString(int size, String start) throws IOException {
@@ -329,6 +354,18 @@ public class ChatServer {
 
 		public void setJoin_id(int join_id) {
 			this.join_id = join_id;
+		}
+
+
+
+		public String getClient_name() {
+			return client_name;
+		}
+
+
+
+		public void setClient_name(String client_name) {
+			this.client_name = client_name;
 		}
 		
 		
