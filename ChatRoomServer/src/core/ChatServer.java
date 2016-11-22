@@ -95,8 +95,9 @@ public class ChatServer {
 					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
 					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + s.join_id;
 
-			mapId++;
+			
 			synchronized (userMap) {
+				mapId++;
 				userMap.put(joinRoom + ":" + mapId, s);
 				System.out.println("join room: " + joinRoom);
 				System.out.println("user map size: " + userMap.size());
@@ -106,7 +107,7 @@ public class ChatServer {
 
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
 					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
-					+ " has joined this chatroom.";
+					+ " has joined this chatroom.\n";
 			pushToAll(joinRoom, joinInform, s, writer);
 
 		} else {
@@ -133,6 +134,7 @@ public class ChatServer {
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
+			System.out.println("key: " + key);
 			ServerThread serverThread = (ServerThread) entry.getValue();
 			if (room.equals(key.split(":")[0]) && serverThread.equals(server)) {
 				return true;
