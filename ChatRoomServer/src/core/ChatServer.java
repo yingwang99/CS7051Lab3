@@ -69,7 +69,6 @@ public class ChatServer {
 
 	public void respondJoin(String[] mString, ServerThread s, PrintWriter writer) throws IOException {
 
-		boolean check = false;
 		String respond = "";
 		String joinRoom = mString[0].split(":")[1];
 
@@ -107,7 +106,7 @@ public class ChatServer {
 
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
 					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
-					+ " has joined this chatroom.\n";
+					+ " has joined this chatroom.";
 			pushToAll(joinRoom, joinInform, s, writer);
 
 		} else {
