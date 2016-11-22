@@ -52,6 +52,7 @@ public class ChatServer {
 
 				Socket cs = serverSocket.accept();
 				 if(setDown == true) {
+					 executorService.shutdown();
 	            		break;
 	            	}
 				ServerThread thread = new ServerThread(cs,id);
@@ -118,7 +119,6 @@ public class ChatServer {
 					} else if (info.startsWith(Utility.LEAVE_CHATROOM)) {
 						String[] mString = addToString(3, info);
 						try {
-							System.out.println(info.substring(info.indexOf(" ") + 1));
 							int roomR = Integer.parseInt(info.trim().substring(info.indexOf(" ") + 1));
 							String leave = chatRooms.get(roomR).getChatRoomName();
 							boolean check = false;
@@ -159,7 +159,6 @@ public class ChatServer {
 						String[] mString = addToString(4, info);
 						try {
 							int index = Integer.parseInt(info.split(":")[1].trim());
-							System.out.println("chat index: " + index);
 							for(ChatRoom chatRoom: chatRooms){
 								System.out.println(chatRoom.toString());
 							}
