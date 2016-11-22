@@ -31,7 +31,7 @@ public class ChatServer {
 	private static ExecutorService executorService = null;
 	public static ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
 	public static HashMap<String, ServerThread> userMap = new HashMap<String, ServerThread>();
-
+	
 	final int POOL_SIZE=10;
 
 	private ServerSocket serverSocket = null;
@@ -51,8 +51,9 @@ public class ChatServer {
 
 				Socket cs = serverSocket.accept();
 				ServerThread thread = new ServerThread(cs,id);
-				executorService.execute(thread);
 				id++;
+				executorService.execute(thread);
+				
 			}
 			
 		} catch (IOException e) {
@@ -93,7 +94,7 @@ public class ChatServer {
 
 			respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
 					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
-					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + s.join_id;
+					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + s.getJoin_id();
 
 			
 			synchronized (userMap) {
@@ -155,7 +156,7 @@ public class ChatServer {
 			System.out.println("check chat room: " + room);
 			
 			if (key.split(":")[0].equals(room)) {	
-				System.out.println("Join_id: " + s.join_id);
+				System.out.println("Join_id: " + s.getJoin_id());
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 				writer.flush();
@@ -325,6 +326,20 @@ public class ChatServer {
 		public void setSocket(Socket socket) {
 			this.socket = socket;
 		}
+
+
+
+		public int getJoin_id() {
+			return join_id;
+		}
+
+
+
+		public void setJoin_id(int join_id) {
+			this.join_id = join_id;
+		}
+		
+		
 
 	}
 
