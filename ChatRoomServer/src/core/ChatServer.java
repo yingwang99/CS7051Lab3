@@ -41,7 +41,7 @@ public class ChatServer {
 	static int mapId = 0;
 	static boolean setDown = false;
 
-	public ChatServer() {
+	public ChatServer() throws IOException {
 
 		try {
 	        executorService=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*POOL_SIZE);
@@ -64,18 +64,17 @@ public class ChatServer {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			 if(serverSocket != null){
+             	serverSocket.close();
+             }
 		}
 		executorService.shutdown();
-		try {
-			serverSocket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	    serverSocket.close();
+		
 
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		new ChatServer();
 	}
