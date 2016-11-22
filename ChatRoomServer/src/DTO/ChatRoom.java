@@ -47,6 +47,12 @@ public class ChatRoom {
 			return false;
 		return true;
 	}
+	@Override
+	public String toString() {
+		return "ChatRoom [chatRoomId=" + chatRoomId + ", chatRoomName=" + chatRoomName + "]";
+	}
+	
+	
 	
 	
 }

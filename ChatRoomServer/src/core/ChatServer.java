@@ -255,8 +255,12 @@ public class ChatServer {
 						String[] mString = addToString(4, info);
 						try {
 							int index = Integer.parseInt(info.split(":")[1].trim());
+							System.out.println("chat index: " + index);
+							for(ChatRoom chatRoom: chatRooms){
+								System.out.println(chatRoom.toString());
+							}
 							String chatRoomName = chatRooms.get(index).getChatRoomName();
-
+							
 							pushToAll(chatRoomName,
 									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3] + "\n\n", this, writer);
 
