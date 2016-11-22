@@ -100,7 +100,7 @@ public class ChatServer {
 			
 			synchronized (userMap) {
 				
-				userMap.put(joinRoom + ":" + mapId, s);
+				userMap.put(joinRoom + ":" + roomRef, s);
 				System.out.println("join room: " + joinRoom);
 				System.out.println("user map size: " + userMap.size());
 			}
@@ -186,6 +186,7 @@ public class ChatServer {
 		private BufferedReader reader;
 		private PrintWriter writer;
 		private int join_id;
+		private String client_name = "";
 
 		public ServerThread(Socket socket,int join_id) throws IOException {
 			this.socket = socket;
@@ -223,10 +224,7 @@ public class ChatServer {
 									writer.println(respondLeave(mString));
 									writer.flush();
 									check = true;
-									String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
-											+ Utility.SEGEMENT + Utility.MESSAGE + ":"
-											+ mString[2].split(":")[1] 
-											+ " has left this chatroom.\n";
+									String leaveMsg = leaveMsgFormate(mString, roomR);
 									pushToAll(leave, leaveMsg, this, writer);
 									synchronized (userMap) {
 										System.out.println(userMap.size());
@@ -276,7 +274,18 @@ public class ChatServer {
 						}
 
 					} else if (info.startsWith(Utility.DISCONNECT)) {
-						addToString(3, info);
+						String[] mStrings = addToString(3, info);
+						
+						Iterator iter = userMap.entrySet().iterator();
+						while (iter.hasNext()) {
+							Map.Entry entry = (Map.Entry) iter.next();
+							String key = (String) entry.getKey();
+							ServerThread value = (ServerThread) entry.getValue();
+							
+							if(mStrings[3].split(":")[0].equals(value.getClient_name())){
+								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[1])), this, writer);
+							}
+						}
 						if (!socket.isClosed()) {
 							socket.close();
 						}
@@ -295,6 +304,16 @@ public class ChatServer {
 				e1.printStackTrace();
 			}
 
+		}
+
+
+
+		private String leaveMsgFormate(String[] mString, int roomR) {
+			String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
+					+ Utility.SEGEMENT + Utility.MESSAGE + ":"
+					+ mString[2].split(":")[1] 
+					+ " has left this chatroom.\n";
+			return leaveMsg;
 		}
 
 		private String[] addToString(int size, String start) throws IOException {
@@ -329,6 +348,18 @@ public class ChatServer {
 
 		public void setJoin_id(int join_id) {
 			this.join_id = join_id;
+		}
+
+
+
+		public String getClient_name() {
+			return client_name;
+		}
+
+
+
+		public void setClient_name(String client_name) {
+			this.client_name = client_name;
 		}
 		
 		
