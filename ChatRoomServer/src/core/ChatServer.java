@@ -281,9 +281,9 @@ public class ChatServer {
 							socket.close();
 						}
 						this.stop();
-					} else {
+					} else if(info.equals("HELO text")){
 						writer.println(
-								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222\n");
+								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
 						writer.flush();
 					}
 				}
