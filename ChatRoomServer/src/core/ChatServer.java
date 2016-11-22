@@ -105,6 +105,11 @@ public class ChatServer {
 					
 					if (info.startsWith(Utility.JOIN_CHATROOM)) {
 						String[] mString = addToString(4, info);
+						
+						if(this.getClient_name().equals("")){
+							this.setClient_name(mString[3].split(":")[1]);
+						}
+						
 						respondJoin(mString, this, writer);
 					} else if (info.startsWith(Utility.LEAVE_CHATROOM)) {
 						String[] mString = addToString(3, info);
