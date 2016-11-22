@@ -298,7 +298,7 @@ public class ChatServer {
 						this.stop();
 					} else if(info.startsWith("HELO BASE_TEST")){
 						writer.println(
-								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
+								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222\n");
 						writer.flush();
 					}
 				}
