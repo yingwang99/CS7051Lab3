@@ -240,7 +240,7 @@ public class ChatServer {
 
 							if (check == false) {
 								writer.println(Utility.ERROR_CODE + ":3" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION
-										+ ":" + "You didn't join that chatroom\n");
+										+ ":" + "You didn't join that chatroom");
 
 								writer.flush();
 							}
@@ -262,7 +262,7 @@ public class ChatServer {
 							String chatRoomName = chatRooms.get(index).getChatRoomName();
 							
 							pushToAll(chatRoomName,
-									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3] + "\n", this, writer);
+									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3]+"\n\n", this, writer);
 
 						} catch (NullPointerException e) {
 							writer.println(Utility.ERROR_CODE + ":2" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION
@@ -283,11 +283,10 @@ public class ChatServer {
 						this.stop();
 					} else {
 						writer.println(
-								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
+								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222\n");
 						writer.flush();
 					}
 				}
-				System.out.println("--------------------------------------");
 				reader.close();
 				writer.close();
 				socket.close();
