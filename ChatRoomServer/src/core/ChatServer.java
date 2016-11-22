@@ -288,7 +288,7 @@ public class ChatServer {
 						reader.readLine();
 					}
 				}
-
+				System.out.println("--------------------------------------");
 				reader.close();
 				writer.close();
 				socket.close();
