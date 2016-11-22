@@ -263,7 +263,7 @@ public class ChatServer {
 							
 							pushToAll(chatRoomName,
 									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3]+"\n\n", this, writer);
-
+							reader.readLine();
 						} catch (NullPointerException e) {
 							writer.println(Utility.ERROR_CODE + ":2" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION
 									+ ":" + "Invalid room reference!");
@@ -308,7 +308,6 @@ public class ChatServer {
 
 			}
 
-			
 			return mString;
 		}
 
