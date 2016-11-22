@@ -285,7 +285,6 @@ public class ChatServer {
 						writer.println(
 								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
 						writer.flush();
-						reader.readLine();
 					}
 				}
 				System.out.println("--------------------------------------");
