@@ -219,7 +219,7 @@ public class ChatServer {
 						writer.flush();
 					}else if(info.startsWith("KILL_SERVICE")){
 								  
-					      MyServer.setDown(true);
+					      setDown = true;
 						  new Socket("localhost", 54321);
 						 
 							break;
