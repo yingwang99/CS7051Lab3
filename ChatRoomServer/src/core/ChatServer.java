@@ -22,7 +22,6 @@ import java.util.concurrent.Executors;
 
 import javax.rmi.CORBA.Util;
 import javax.sound.midi.MidiDevice.Info;
-import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 
 import DTO.ChatRoom;
 import DTO.User;
@@ -90,7 +89,7 @@ public class ChatServer {
 			}else{
 				chatRoom = checkChatRoom(joinRoom);
 			}
-			String nickname = mString[3].split(":")[1];
+
 			roomRef = chatRoom.getChatRoomId();
 
 			mapId++;
@@ -101,13 +100,15 @@ public class ChatServer {
 			
 			synchronized (userMap) {
 				
-				userMap.put(joinRoom + ":" + roomRef + ":" + nickname, s);
+				userMap.put(joinRoom + ":" + mapId, s);
 				System.out.println("join room: " + joinRoom);
 				System.out.println("user map size: " + userMap.size());
 			}
 
 			writer.println(respond);
 
+			String nickname = mString[3].split(":")[1];
+	
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
 					+ Utility.MESSAGE + ":" + nickname
 					+ " has joined this chatroom.\n";
@@ -204,18 +205,13 @@ public class ChatServer {
 				while ((info = reader.readLine()) != null) {
 					
 					if (info.startsWith(Utility.JOIN_CHATROOM)) {
-						
 						String[] mString = addToString(4, info);
-						
-						if(this.getClient_name() == null)
-							this.setClient_name(mString[3].split(":")[1]);
-						
 						respondJoin(mString, this, writer);
 					} else if (info.startsWith(Utility.LEAVE_CHATROOM)) {
 						String[] mString = addToString(3, info);
 						try {
 							System.out.println(info.substring(info.indexOf(" ") + 1));
-							int roomR = Integer.parseInt(info.substring(info.indexOf(" ") + 1));
+							int roomR = Integer.parseInt(info.trim().substring(info.indexOf(" ") + 1));
 							String leave = chatRooms.get(roomR).getChatRoomName();
 							boolean check = false;
 							
@@ -228,7 +224,10 @@ public class ChatServer {
 									writer.println(respondLeave(mString));
 									writer.flush();
 									check = true;
-									String leaveMsg = leaveMsg(mString, roomR);
+									String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
+											+ Utility.SEGEMENT + Utility.MESSAGE + ":"
+											+ mString[2].split(":")[1] 
+											+ " has left this chatroom.\n";
 									pushToAll(leave, leaveMsg, this, writer);
 									synchronized (userMap) {
 										System.out.println(userMap.size());
@@ -278,18 +277,14 @@ public class ChatServer {
 						}
 
 					} else if (info.startsWith(Utility.DISCONNECT)) {
-						String[] mString =addToString(3, info);
+						addToString(3, info);
 						
 						while (iter.hasNext()) {
 							Map.Entry entry = (Map.Entry) iter.next();
 							String key = (String) entry.getKey();
 							ServerThread value = (ServerThread) entry.getValue();
 							
-							if(value.getClient_name().equals(this.getClient_name())){
-								
-								pushToAll(key.split(":")[0], leaveMsg(mString, Integer.parseInt(key.split(":")[1])), this, writer);
-								
-							}
+							
 						}
 				        
 						if (!socket.isClosed()) {
@@ -298,7 +293,7 @@ public class ChatServer {
 						this.stop();
 					} else if(info.startsWith("HELO BASE_TEST")){
 						writer.println(
-								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222\n");
+								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
 						writer.flush();
 					}
 				}
@@ -310,16 +305,6 @@ public class ChatServer {
 				e1.printStackTrace();
 			}
 
-		}
-
-
-
-		private String leaveMsg(String[] mString, int roomR) {
-			String leaveMsg = Utility.CHAT + ":" + roomR + Utility.SEGEMENT + mString[2]
-					+ Utility.SEGEMENT + Utility.MESSAGE + ":"
-					+ mString[2].split(":")[1] 
-					+ " has left this chatroom.\n";
-			return leaveMsg;
 		}
 
 		private String[] addToString(int size, String start) throws IOException {
