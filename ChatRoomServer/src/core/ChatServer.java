@@ -262,8 +262,8 @@ public class ChatServer {
 							String chatRoomName = chatRooms.get(index).getChatRoomName();
 							
 							pushToAll(chatRoomName,
-									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3]+"\n\n", this, writer);
-							reader.readLine();
+									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3]+"\n\n\n", this, writer);
+						
 						} catch (NullPointerException e) {
 							writer.println(Utility.ERROR_CODE + ":2" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION
 									+ ":" + "Invalid room reference!");
