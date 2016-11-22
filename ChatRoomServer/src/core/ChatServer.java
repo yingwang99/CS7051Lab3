@@ -85,12 +85,12 @@ public class ChatServer {
 				synchronized (chatRooms) {
 					chatRooms.add(chatRoom);
 				}
-				roomRef = chatRoom.getChatRoomId();
 
 			}else{
 				chatRoom = checkChatRoom(joinRoom);
 			}
 
+			roomRef = chatRoom.getChatRoomId();
 
 			respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
 					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
