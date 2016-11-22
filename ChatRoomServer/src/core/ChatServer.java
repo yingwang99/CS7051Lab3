@@ -185,7 +185,9 @@ public class ChatServer {
 							ServerThread value = (ServerThread) entry.getValue();
 							System.out.println("test..." + mStrings[2] + " " + value.getClient_name());
 							if(mStrings[2].split(":")[1].equals(value.getClient_name())){
-								
+								synchronized (userMap) {
+									userMap.remove(key);
+								}
 								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[2])), this, writer);
 							}
 						}
