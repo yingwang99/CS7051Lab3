@@ -153,13 +153,11 @@ public class ChatServer {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
 			ServerThread serverThread = (ServerThread) entry.getValue();
-			System.out.println(key.split(":")[0]);
-			System.out.println("check chat room: " + room);
 			
 			if (key.split(":")[0].equals(room)) {	
+				System.out.println(key);
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
-				writer.flush();
 			}
 		}
 		
@@ -264,7 +262,7 @@ public class ChatServer {
 							String chatRoomName = chatRooms.get(index).getChatRoomName();
 							
 							pushToAll(chatRoomName,
-									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3] + "\n\n", this, writer);
+									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3] + "\n", this, writer);
 
 						} catch (NullPointerException e) {
 							writer.println(Utility.ERROR_CODE + ":2" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION
