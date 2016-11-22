@@ -157,9 +157,10 @@ public class ChatServer {
 				System.out.println(msg);
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
+				writer.flush();
 			}
 		}
-		writer.flush();
+		
 
 	}
 
