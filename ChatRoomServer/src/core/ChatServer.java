@@ -31,7 +31,7 @@ public class ChatServer {
 	private static ExecutorService executorService = null;
 	public static ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
 	public static HashMap<String, ServerThread> userMap = new HashMap<String, ServerThread>();
-	Iterator iter = userMap.entrySet().iterator();
+	
 	final int POOL_SIZE=10;
 
 	private ServerSocket serverSocket = null;
@@ -107,10 +107,8 @@ public class ChatServer {
 
 			writer.println(respond);
 
-			String nickname = mString[3].split(":")[1];
-	
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
-					+ Utility.MESSAGE + ":" + nickname
+					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
 					+ " has joined this chatroom.\n";
 			pushToAll(joinRoom, joinInform, s, writer);
 
@@ -134,6 +132,7 @@ public class ChatServer {
 	}
 
 	public synchronized boolean checkJoin(String room, ServerThread server) {
+		Iterator iter = userMap.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
@@ -149,6 +148,7 @@ public class ChatServer {
 	}
 
 	public synchronized void pushToAll(String room, String msg, ServerThread s, PrintWriter writer) throws IOException {
+		Iterator iter = userMap.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String key = (String) entry.getKey();
@@ -186,7 +186,6 @@ public class ChatServer {
 		private BufferedReader reader;
 		private PrintWriter writer;
 		private int join_id;
-		private String client_name;
 
 		public ServerThread(Socket socket,int join_id) throws IOException {
 			this.socket = socket;
@@ -214,7 +213,7 @@ public class ChatServer {
 							int roomR = Integer.parseInt(info.trim().substring(info.indexOf(" ") + 1));
 							String leave = chatRooms.get(roomR).getChatRoomName();
 							boolean check = false;
-							
+							Iterator iter = userMap.entrySet().iterator();
 							while (iter.hasNext()) {
 								Map.Entry entry = (Map.Entry) iter.next();
 								String key = (String) entry.getKey();
@@ -278,15 +277,6 @@ public class ChatServer {
 
 					} else if (info.startsWith(Utility.DISCONNECT)) {
 						addToString(3, info);
-						
-						while (iter.hasNext()) {
-							Map.Entry entry = (Map.Entry) iter.next();
-							String key = (String) entry.getKey();
-							ServerThread value = (ServerThread) entry.getValue();
-							
-							
-						}
-				        
 						if (!socket.isClosed()) {
 							socket.close();
 						}
@@ -339,18 +329,6 @@ public class ChatServer {
 
 		public void setJoin_id(int join_id) {
 			this.join_id = join_id;
-		}
-
-
-
-		public String getClient_name() {
-			return client_name;
-		}
-
-
-
-		public void setClient_name(String client_name) {
-			this.client_name = client_name;
 		}
 		
 		
