@@ -68,108 +68,7 @@ public class ChatServer {
 		new ChatServer();
 	}
 
-	public void respondJoin(String[] mString, ServerThread s, PrintWriter writer) throws IOException {
-
-		String respond = "";
-		String joinRoom = mString[0].split(":")[1];
-
-		System.out.println(checkJoin(joinRoom.trim(), s));
-		if (checkJoin(joinRoom.trim(), s) == false) {
-			int roomRef = 0;
-
-			ChatRoom chatRoom = null;
-
-			if (checkChatRoom(joinRoom) == null) {
-				chatRoom = new ChatRoom(chatRooms.size(), joinRoom);
-		
-				synchronized (chatRooms) {
-					chatRooms.add(chatRoom);
-				}
-
-			}else{
-				chatRoom = checkChatRoom(joinRoom);
-			}
-
-			roomRef = chatRoom.getChatRoomId();
-
-			mapId++;
-			respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
-					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
-					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + mapId;
-
-			
-			synchronized (userMap) {
-				
-				userMap.put(joinRoom + ":" + roomRef, s);
-				System.out.println("join room: " + joinRoom);
-				System.out.println("user map size: " + userMap.size());
-			}
-
-			writer.println(respond);
-
-			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
-					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
-					+ " has joined this chatroom.\n";
-			pushToAll(joinRoom, joinInform, s, writer);
-
-		} else {
-			respond = Utility.ERROR_CODE + ":0" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION + ":"
-					+ "You have joined the chatroom!";
-			writer.println(respond);
-		}
-
-		writer.flush();
-
-	}
-
-	public synchronized ChatRoom checkChatRoom(String room) {
-		for (ChatRoom chatRoom : chatRooms) {
-			if (chatRoom.getChatRoomName().equals(room)) {
-				return chatRoom;
-			}
-		}
-		return null;
-	}
-
-	public synchronized boolean checkJoin(String room, ServerThread server) {
-		Iterator iter = userMap.entrySet().iterator();
-		while (iter.hasNext()) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			String key = (String) entry.getKey();
-			System.out.println("key: " + key);
-			ServerThread serverThread = (ServerThread) entry.getValue();
-			if (room.equals(key.split(":")[0]) && serverThread.equals(server)) {
-				return true;
-			}
-		}
-
-		return false;
-
-	}
-
-	public synchronized void pushToAll(String room, String msg, ServerThread s, PrintWriter writer) throws IOException {
-		Iterator iter = userMap.entrySet().iterator();
-		while (iter.hasNext()) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			String key = (String) entry.getKey();
-			ServerThread serverThread = (ServerThread) entry.getValue();
-			
-			if (key.split(":")[0].equals(room)) {	
-				System.out.println(key);
-				writer = getWriter(serverThread.getSocket());
-				writer.println(msg);
-			}
-		}
-		
-
-	}
-
-	public String respondLeave(String[] mString) {
-
-		return Utility.LEFT_CHATROOM + ":" + mString[0].split(":")[1] + Utility.SEGEMENT
-				+ Utility.JOIN_ID + ":" + mString[1].split(":")[1];
-
-	}
+	
 
 	public PrintWriter getWriter(Socket socket) throws IOException {
 		OutputStream socketOut = socket.getOutputStream();
@@ -227,9 +126,7 @@ public class ChatServer {
 									String leaveMsg = leaveMsgFormate(mString, roomR);
 									pushToAll(leave, leaveMsg, this, writer);
 									synchronized (userMap) {
-										System.out.println(userMap.size());
 										userMap.remove(key);
-										System.out.println(userMap.size());
 									}
 
 									break;
@@ -283,7 +180,7 @@ public class ChatServer {
 							ServerThread value = (ServerThread) entry.getValue();
 							
 							if(mStrings[3].split(":")[0].equals(value.getClient_name())){
-								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[1])), this, writer);
+								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[2])), this, writer);
 							}
 						}
 						if (!socket.isClosed()) {
@@ -328,6 +225,109 @@ public class ChatServer {
 			}
 
 			return mString;
+		}
+		
+		public void respondJoin(String[] mString, ServerThread s, PrintWriter writer) throws IOException {
+
+			String respond = "";
+			String joinRoom = mString[0].split(":")[1];
+
+			System.out.println(checkJoin(joinRoom.trim(), s));
+			if (checkJoin(joinRoom.trim(), s) == false) {
+				int roomRef = 0;
+
+				ChatRoom chatRoom = null;
+
+				if (checkChatRoom(joinRoom) == null) {
+					chatRoom = new ChatRoom(chatRooms.size(), joinRoom);
+			
+					synchronized (chatRooms) {
+						chatRooms.add(chatRoom);
+					}
+
+				}else{
+					chatRoom = checkChatRoom(joinRoom);
+				}
+
+				roomRef = chatRoom.getChatRoomId();
+
+				mapId++;
+				respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
+						+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
+						+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + mapId;
+
+				
+				synchronized (userMap) {
+					
+					userMap.put(joinRoom + ":" + mapId + ":"+roomRef, s);
+					System.out.println("join room: " + joinRoom);
+					System.out.println("user map size: " + userMap.size());
+				}
+
+				writer.println(respond);
+
+				String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
+						+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
+						+ " has joined this chatroom.\n";
+				pushToAll(joinRoom, joinInform, s, writer);
+
+			} else {
+				respond = Utility.ERROR_CODE + ":0" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION + ":"
+						+ "You have joined the chatroom!";
+				writer.println(respond);
+			}
+
+			writer.flush();
+
+		}
+
+		private synchronized ChatRoom checkChatRoom(String room) {
+			for (ChatRoom chatRoom : chatRooms) {
+				if (chatRoom.getChatRoomName().equals(room)) {
+					return chatRoom;
+				}
+			}
+			return null;
+		}
+
+		private synchronized boolean checkJoin(String room, ServerThread server) {
+			Iterator iter = userMap.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry entry = (Map.Entry) iter.next();
+				String key = (String) entry.getKey();
+				System.out.println("key: " + key);
+				ServerThread serverThread = (ServerThread) entry.getValue();
+				if (room.equals(key.split(":")[0]) && serverThread.equals(server)) {
+					return true;
+				}
+			}
+
+			return false;
+
+		}
+
+		private synchronized void pushToAll(String room, String msg, ServerThread s, PrintWriter writer) throws IOException {
+			Iterator iter = userMap.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry entry = (Map.Entry) iter.next();
+				String key = (String) entry.getKey();
+				ServerThread serverThread = (ServerThread) entry.getValue();
+				
+				if (key.split(":")[0].equals(room)) {	
+					System.out.println(key);
+					writer = getWriter(serverThread.getSocket());
+					writer.println(msg);
+				}
+			}
+			
+
+		}
+
+		private String respondLeave(String[] mString) {
+
+			return Utility.LEFT_CHATROOM + ":" + mString[0].split(":")[1] + Utility.SEGEMENT
+					+ Utility.JOIN_ID + ":" + mString[1].split(":")[1];
+
 		}
 
 		public Socket getSocket() {
