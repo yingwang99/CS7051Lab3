@@ -52,7 +52,7 @@ public class ChatServer {
 
 				Socket cs = serverSocket.accept();
 				 if(setDown == true) {
-					 executorService.shutdown();
+					 
 	            		break;
 	            	}
 				ServerThread thread = new ServerThread(cs,id);
@@ -61,6 +61,13 @@ public class ChatServer {
 				
 			}
 			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		executorService.shutdown();
+		try {
+			serverSocket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
