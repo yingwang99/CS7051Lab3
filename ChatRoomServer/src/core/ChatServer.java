@@ -179,7 +179,7 @@ public class ChatServer {
 							String key = (String) entry.getKey();
 							ServerThread value = (ServerThread) entry.getValue();
 							
-							if(mStrings[3].split(":")[0].equals(value.getClient_name())){
+							if(mStrings[2].split(":")[0].equals(value.getClient_name())){
 								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[2])), this, writer);
 							}
 						}
