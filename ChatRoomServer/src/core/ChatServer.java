@@ -50,7 +50,7 @@ public class ChatServer {
 			while (true) {
 
 				Socket cs = serverSocket.accept();
-				ServerThread thread = new ServerThread(cs);
+				ServerThread thread = new ServerThread(cs,id);
 				executorService.execute(thread);
 				id++;
 			}
@@ -79,7 +79,7 @@ public class ChatServer {
 
 			ChatRoom chatRoom = null;
 
-			if (checkChatRoom(joinRoom) == false) {
+			if (checkChatRoom(joinRoom) == null) {
 				chatRoom = new ChatRoom(chatRooms.size(), joinRoom);
 		
 				synchronized (chatRooms) {
@@ -88,18 +88,13 @@ public class ChatServer {
 				roomRef = chatRoom.getChatRoomId();
 
 			}else{
-				for(ChatRoom c: chatRooms){
-					if(c.getChatRoomName().equals(joinRoom)){
-						roomRef = c.getChatRoomId();
-						break;
-					}
-				}
+				chatRoom = checkChatRoom(joinRoom);
 			}
 
 
 			respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
 					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
-					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + id;
+					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + s.join_id;
 
 			mapId++;
 			synchronized (userMap) {
@@ -125,13 +120,13 @@ public class ChatServer {
 
 	}
 
-	public synchronized boolean checkChatRoom(String room) {
+	public synchronized ChatRoom checkChatRoom(String room) {
 		for (ChatRoom chatRoom : chatRooms) {
-			if (chatRoom.equals(room)) {
-				return true;
+			if (chatRoom.getChatRoomName().equals(room)) {
+				return chatRoom;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public synchronized boolean checkJoin(String room, ServerThread server) {
@@ -189,12 +184,16 @@ public class ChatServer {
 		private Socket socket;
 		private BufferedReader reader;
 		private PrintWriter writer;
+		private int join_id;
 
-		public ServerThread(Socket socket) throws IOException {
+		public ServerThread(Socket socket,int join_id) throws IOException {
 			this.socket = socket;
 			reader = getReader(socket);
 			writer = getWriter(socket);
+			this.join_id = join_id;
 		}
+
+		
 
 		@SuppressWarnings("deprecation")
 		public void run() {
