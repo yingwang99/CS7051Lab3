@@ -109,7 +109,7 @@ public class ChatServer {
 
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
 					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
-					+ " has joined this chatroom.\n";
+					+ " has joined this chatroom.";
 			pushToAll(joinRoom, joinInform, s, writer);
 
 		} else {
@@ -263,7 +263,6 @@ public class ChatServer {
 							
 							pushToAll(chatRoomName,
 									info + Utility.SEGEMENT + mString[2] + Utility.SEGEMENT + mString[3] + "\n\n", this, writer);
-							reader.readLine();
 
 						} catch (NullPointerException e) {
 							writer.println(Utility.ERROR_CODE + ":2" + Utility.SEGEMENT + Utility.ERROR_DESCRIPTION
