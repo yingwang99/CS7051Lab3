@@ -92,13 +92,14 @@ public class ChatServer {
 
 			roomRef = chatRoom.getChatRoomId();
 
+			mapId++;
 			respond = Utility.JOINED_CHATROOM + ":" + joinRoom + Utility.SEGEMENT + Utility.SERVER_IP + ":" + localIp
 					+ Utility.SEGEMENT + Utility.PORT + ":" + 54321 + Utility.SEGEMENT + Utility.ROOM_REF + ":"
-					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + s.getJoin_id();
+					+ roomRef + Utility.SEGEMENT + Utility.JOIN_ID + ":" + mapId;
 
 			
 			synchronized (userMap) {
-				mapId++;
+				
 				userMap.put(joinRoom + ":" + mapId, s);
 				System.out.println("join room: " + joinRoom);
 				System.out.println("user map size: " + userMap.size());
@@ -156,7 +157,6 @@ public class ChatServer {
 			System.out.println("check chat room: " + room);
 			
 			if (key.split(":")[0].equals(room)) {	
-				System.out.println("Join_id: " + s.getJoin_id());
 				writer = getWriter(serverThread.getSocket());
 				writer.println(msg);
 				writer.flush();
