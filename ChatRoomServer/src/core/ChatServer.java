@@ -176,8 +176,9 @@ public class ChatServer {
 						}
 
 					} else if (info.startsWith(Utility.DISCONNECT)) {
-						String[] mStrings = addToString(3, info);
 						
+						String[] mStrings = addToString(3, info);
+						ArrayList<String> remove = new ArrayList<String>();
 						Iterator iter = userMap.entrySet().iterator();
 						while (iter.hasNext()) {
 							Map.Entry entry = (Map.Entry) iter.next();
@@ -185,16 +186,20 @@ public class ChatServer {
 							ServerThread value = (ServerThread) entry.getValue();
 							System.out.println("test..." + mStrings[2] + " " + value.getClient_name());
 							if(mStrings[2].split(":")[1].equals(value.getClient_name())){
-								synchronized (userMap) {
-									userMap.remove(key);
-								}
+								remove.add(key);
 								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[2])), this, writer);
+							}
+						}
+						synchronized (userMap) {
+							for(String rString: remove){
+								userMap.remove(rString);
 							}
 						}
 						if (!socket.isClosed()) {
 							socket.close();
 						}
 						this.stop();
+						
 					} else if(info.startsWith("HELO BASE_TEST")){
 						writer.println(
 								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
