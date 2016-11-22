@@ -39,6 +39,7 @@ public class ChatServer {
 
 	static int id = 0;
 	static int mapId = 0;
+	static boolean setDown = false;
 
 	public ChatServer() {
 
@@ -50,6 +51,9 @@ public class ChatServer {
 			while (true) {
 
 				Socket cs = serverSocket.accept();
+				 if(setDown == true) {
+	            		break;
+	            	}
 				ServerThread thread = new ServerThread(cs,id);
 				id++;
 				executorService.execute(thread);
@@ -178,7 +182,9 @@ public class ChatServer {
 					} else if (info.startsWith(Utility.DISCONNECT)) {
 						
 						String[] mStrings = addToString(3, info);
-						ArrayList<String> remove = new ArrayList<String>();
+						HashMap<String, ServerThread> removeMap = new HashMap<String, ServerThread>();
+						
+						
 						Iterator iter = userMap.entrySet().iterator();
 						while (iter.hasNext()) {
 							Map.Entry entry = (Map.Entry) iter.next();
@@ -186,25 +192,39 @@ public class ChatServer {
 							ServerThread value = (ServerThread) entry.getValue();
 							System.out.println("test..." + mStrings[2] + " " + value.getClient_name());
 							if(mStrings[2].split(":")[1].equals(value.getClient_name())){
-								remove.add(key);
+								removeMap.put(key,value);
 								pushToAll(key.split(":")[0], leaveMsgFormate(mStrings, Integer.parseInt(key.split(":")[2])), this, writer);
 							}
 						}
 						synchronized (userMap) {
-							for(String rString: remove){
-								userMap.remove(rString);
+							Iterator iter2 = removeMap.entrySet().iterator();
+							while (iter2.hasNext()) {
+								Map.Entry entry = (Map.Entry) iter2.next();
+								String key = (String) entry.getKey();
+								ServerThread value = (ServerThread) entry.getValue();
+								userMap.remove(key);
+								
+								if (!value.getSocket().isClosed()) {
+									value.getSocket().close();
+								}
+								value.stop();
+								
 							}
 						}
-						if (!socket.isClosed()) {
-							socket.close();
-						}
-						this.stop();
+						
 						
 					} else if(info.startsWith("HELO BASE_TEST")){
 						writer.println(
 								info + "\n" + "IP:" + localIp + "\n" + "Port: " + 54321 + "\nStudentID: 16308222");
 						writer.flush();
-					}
+					}else if(info.startsWith("KILL_SERVICE")){
+								  
+					      MyServer.setDown(true);
+						  new Socket("localhost", 54321);
+						 
+							break;
+			        			  
+			  	            	}
 				}
 				reader.close();
 				writer.close();
