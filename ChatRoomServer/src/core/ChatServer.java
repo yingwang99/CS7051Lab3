@@ -109,7 +109,7 @@ public class ChatServer {
 
 			String joinInform = Utility.CHAT + ":" + roomRef + Utility.SEGEMENT + mString[3] + Utility.SEGEMENT
 					+ Utility.MESSAGE + ":" + mString[3].split(":")[1]
-					+ " has joined this chatroom.";
+					+ " has joined this chatroom.\n";
 			pushToAll(joinRoom, joinInform, s, writer);
 
 		} else {
